@@ -1,0 +1,169 @@
+@import url("https://fonts.googleapis.com/css?family=Alatsi:wght@400;700&display=swap");
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: "Alatsi", sans-serif;
+  background-color: #000000b9;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  padding: 16px;
+}
+
+.chat-container {
+  background: white;
+  padding: 20px;
+  border-radius: 12px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+  width: 100%;
+  max-width: 600px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  height: 90vh;
+  overflow: hidden;
+}
+
+.chat-output {
+  background: #f8f8f8;
+  padding: 16px;
+  border-radius: 8px;
+  flex-grow: 1;
+  overflow-y: auto;
+  color: #222;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.chat-message {
+  background: #eaeaea;
+  padding: 12px;
+  border-radius: 8px;
+  font-size: 14px;
+  word-wrap: break-word;
+  line-height: 1.5;
+}
+
+.message-text {
+  font-size: 14px;
+  color: #222;
+}
+
+.language-detected {
+  font-size: 12px;
+  color: #ff7b00;
+  margin-top: 5px;
+  font-style: italic;
+}
+
+.summary-text,
+.translated-text {
+  background: #efefef;
+  color: #000;
+  padding: 12px;
+  font-size: 14px;
+  font-weight: 100;
+  border-radius: 8px;
+  margin-top: 5px;
+  word-wrap: break-word;
+}
+
+.chat-input {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  position: sticky;
+  bottom: 0;
+  background: white;
+  padding: 10px;
+  border-top: 1px solid #ccc;
+}
+
+.input-textarea {
+  width: 100%;
+  min-height: 100px;
+  padding: 12px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  resize: none;
+  font-size: 14px;
+}
+
+.action-btn {
+  background: #0c0c0c;
+  color: white;
+  font-weight: 550;
+  border: none;
+  padding: 10px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: 0.3s ease-in-out;
+  font-size: 14px;
+  margin-top: 5px;
+}
+
+.action-btn:hover {
+  background: #3d3d3d;
+}
+
+.language-dropdown {
+  padding: 10px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  cursor: pointer;
+  background-color: #f4f4f4;
+  font-size: 14px;
+  margin-top: 5px;
+}
+
+.error-message {
+  color: red;
+  font-size: 12px;
+  text-align: center;
+}
+
+@media (max-width: 768px) {
+  .chat-container {
+    width: 95%;
+    padding: 16px;
+  }
+
+  .input-textarea {
+    height: 90px;
+    font-size: 14px;
+  }
+
+  .action-btn {
+    padding: 10px;
+    font-size: 13px;
+  }
+}
+
+@media (max-width: 480px) {
+  .chat-container {
+    width: 100%;
+    margin: auto;
+    padding: 14px;
+  }
+
+  .message-text {
+    font-size: 13px;
+  }
+
+  .input-textarea {
+    height: 80px;
+    font-size: 13px;
+  }
+
+  .action-btn {
+    padding: 10px;
+    font-size: 12px;
+  }
+}

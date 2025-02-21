@@ -62,7 +62,9 @@ async function detectLanguage(text) {
       return null;
     }
 
-    return detectedLanguages[0].detectedLanguage;
+    const detectedLanguage = detectedLanguages[0].detectedLanguage;
+    console.log(`Detected Language: ${detectedLanguage}`);
+    return detectedLanguage;
   } catch (error) {
     console.error("Error detecting language:", error);
     return null;
@@ -101,9 +103,11 @@ const TextProcessingInterface = () => {
       setError("Please enter text before sending.");
       return;
     }
-    setError("");
-
+    setError(""); 
+  
     const detectedLanguage = await detectLanguage(text);
+    console.log("Detected language:", detectedLanguage); 
+  
     const newMessage = {
       text,
       detectedLanguage,
@@ -111,15 +115,17 @@ const TextProcessingInterface = () => {
       translation: "",
       showSummarize: detectedLanguage === "en" && text.length > 150,
     };
-
+  
     setMessages([...messages, newMessage]);
     setText("");
+    setLoading({ index: null, type: "" }); 
   };
+  
 
   const handleSummarize = async (index) => {
     setLoading({ index, type: "summarizing" });
+    setError(""); 
     const summarizer = await createSummarizer();
-
     if (!summarizer) {
       showError("Summarizer failed to initialize.", setError, setLoading);
       return;
@@ -143,13 +149,14 @@ const TextProcessingInterface = () => {
     } catch (error) {
       showError("Summarization failed.", setError, setLoading);
     } finally {
-      setLoading({ index: null, type: "" });
+      setLoading({ index: null, type: "" }); 
     }
   };
 
   const handleTranslate = async (index) => {
     console.log("Translation started. Loading state:", loading);
     setLoading({ index, type: "translating" });
+    setError("");
 
     try {
       const message = messages[index];

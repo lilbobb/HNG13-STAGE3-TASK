@@ -1,15 +1,16 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 // Initialize Summarizer
 async function createSummarizer() {
   try {
-    if (!self.ai || !self.ai.summarizer) {
+    if (typeof self === "undefined" || !self.ai || !self.ai.summarizer) {
       console.error("Summarizer API is not available.");
       return null;
     }
 
     const options = { format: "plain-text", length: "short", maxLength: 50 };
-    const available = (await self.ai.summarizer.capabilities()).available;
+    const capabilities = await self.ai.summarizer.capabilities();
+    const available = capabilities.available;
 
     if (available === "no") {
       console.error("Summarizer API isn't usable.");
@@ -18,9 +19,9 @@ async function createSummarizer() {
 
     const summarizer = await self.ai.summarizer.create(options);
     if (available !== "readily") {
-      summarizer.addEventListener("downloadprogress", (e) =>
-        console.log(`Downloading: ${e.loaded}/${e.total} bytes.`)
-      );
+      summarizer.addEventListener("downloadprogress", (e) => {
+        console.log(`Downloading: ${e.loaded}/${e.total} bytes.`);
+      });
       await summarizer.ready;
     }
 
@@ -34,7 +35,7 @@ async function createSummarizer() {
 // Initialize Translator
 async function createTranslator(sourceLanguage, targetLanguage) {
   try {
-    if (!self.ai || !self.ai.translator) {
+    if (typeof self === "undefined" || !self.ai || !self.ai.translator) {
       console.error("AI translation API is not available.");
       return null;
     }
@@ -48,7 +49,7 @@ async function createTranslator(sourceLanguage, targetLanguage) {
 // Language Detection
 async function detectLanguage(text) {
   try {
-    if (!self.ai || !self.ai.languageDetector) {
+    if (typeof self === "undefined" || !self.ai || !self.ai.languageDetector) {
       console.error("Language Detector API is not available.");
       return null;
     }
@@ -68,12 +69,32 @@ async function detectLanguage(text) {
   }
 }
 
+const getStoredMessages = () => {
+  try {
+    return JSON.parse(localStorage.getItem("messages")) || [];
+  } catch (error) {
+    console.error("Error reading from localStorage:", error);
+    return [];
+  }
+};
+
+const showError = (message, setError, setLoading) => {
+  console.error(message);
+  setError(message);
+  setLoading({ index: null, type: "" });
+};
+
 const TextProcessingInterface = () => {
   const [text, setText] = useState("");
-  const [messages, setMessages] = useState([]);
+  const [messages, setMessages] = useState(getStoredMessages());
   const [language, setLanguage] = useState("en");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState({ index: null, type: "" });
+
+  useEffect(() => {
+    console.log("Loading state:", loading);
+    localStorage.setItem("messages", JSON.stringify(messages));
+  }, [loading, messages]);
 
   const handleSend = async () => {
     if (!text.trim()) {
@@ -91,16 +112,16 @@ const TextProcessingInterface = () => {
       showSummarize: detectedLanguage === "en" && text.length > 150,
     };
 
-    setMessages((prev) => [...prev, newMessage]);
+    setMessages([...messages, newMessage]);
     setText("");
   };
 
   const handleSummarize = async (index) => {
     setLoading({ index, type: "summarizing" });
     const summarizer = await createSummarizer();
+
     if (!summarizer) {
-      setError("Summarizer failed to initialize.");
-      setLoading({ index: null, type: "" });
+      showError("Summarizer failed to initialize.", setError, setLoading);
       return;
     }
 
@@ -114,43 +135,34 @@ const TextProcessingInterface = () => {
         result += chunk;
       }
 
-      setMessages((prev) =>
-        prev.map((msg, i) =>
+      setMessages((prevMessages) =>
+        prevMessages.map((msg, i) =>
           i === index ? { ...msg, summary: result.trim() } : msg
         )
       );
     } catch (error) {
-      console.error("Error during summarization:", error);
-      setError("Summarization failed.");
+      showError("Summarization failed.", setError, setLoading);
+    } finally {
+      setLoading({ index: null, type: "" });
     }
-    setLoading({ index: null, type: "" });
   };
 
   const handleTranslate = async (index) => {
+    console.log("Translation started. Loading state:", loading);
     setLoading({ index, type: "translating" });
-    const message = messages[index];
-
-    if (!message.text) {
-      setError("No text available for translation.");
-      setLoading({ index: null, type: "" });
-      return;
-    }
-
-    if (!message.detectedLanguage) {
-      setError("Language detection failed.");
-      setLoading({ index: null, type: "" });
-      return;
-    }
 
     try {
+      const message = messages[index];
+      if (!message.text || !message.detectedLanguage) {
+        throw new Error("Text or language detection failed.");
+      }
+
       const translator = await createTranslator(
         message.detectedLanguage,
         language
       );
       if (!translator) {
-        setError("Error initializing translator.");
-        setLoading({ index: null, type: "" });
-        return;
+        throw new Error("Error initializing translator.");
       }
 
       const stream = await translator.translate(message.text);
@@ -159,16 +171,21 @@ const TextProcessingInterface = () => {
         result += chunk;
       }
 
-      setMessages((prev) =>
-        prev.map((msg, i) =>
+      setMessages((prevMessages) =>
+        prevMessages.map((msg, i) =>
           i === index ? { ...msg, translation: result.trim() } : msg
         )
       );
     } catch (error) {
-      console.error("Translation error:", error);
-      setError("Error translating text.");
+      showError(error.message, setError, setLoading);
+    } finally {
+      setLoading({ index: null, type: "" });
     }
-    setLoading({ index: null, type: "" });
+  };
+
+  const handleClearAll = () => {
+    setMessages([]);
+    localStorage.removeItem("messages");
   };
 
   return (
@@ -177,6 +194,9 @@ const TextProcessingInterface = () => {
         <h1 className="main-title">Chrome AI</h1>
       </header>
       <div className="chat-container">
+        <button className="clear-all-btn" onClick={handleClearAll}>
+          Clear all
+        </button>
         <div className="chat-output">
           {messages.map((msg, index) => (
             <div key={index} className="chat-message">
@@ -255,7 +275,7 @@ const TextProcessingInterface = () => {
             disabled={!text.trim()}
             aria-label="Send text"
           >
-            🚀
+            🡆
           </button>
         </div>
       </div>

@@ -68,7 +68,7 @@ body {
   display: flex;
   flex-direction: column;
   gap: 16px;
-  height: 70vh;
+  height: 80vh;
   overflow: hidden;
   color: #ffffff;
 }

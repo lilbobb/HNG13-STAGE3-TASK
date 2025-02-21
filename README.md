@@ -71,5 +71,5 @@ The **AI-Powered Text Processing Interface** is a web application that allows us
 ## 🔧 Installation & Setup  
 1. **Clone the repository:**  
    ```bash
-   git clone https://github.com/your-username/ai-text-processing.git
-   cd ai-text-processing
+   git clone https://github.com/lilbobb(https://github.com/lilbobb/HNG13-STAGE3-TASK)/ai-text-processing.git)
+  

@@ -13,13 +13,13 @@ body {
   justify-content: center;
   align-items: center;
   height: 100vh;
-  padding: 16px;
+  padding: 10px;
   color: #ffffff;
 }
 
 .clear-all-btn{
   background: none;
-  color: #ff4d4d; 
+  color: #ff4d4d;
   font-weight: 600;
   border: 1px solid #ff4d4d;
   align-items: flex-end;
@@ -96,7 +96,6 @@ body {
   background: #666;
   border-radius: 4px;
 }
-
 
 .chat-message {
   background: #3b3b3b;
@@ -178,7 +177,7 @@ body {
   position: absolute;
   right: 20px;
   bottom: 20px;
-  background: #2ecc71;
+  background: #2ecc71; 
   border-radius: 50%;
   width: 35px;
   height: 35px;
@@ -213,12 +212,6 @@ body {
   color: #ff4d4d;
   font-size: 12px;
   text-align: center;
-}
-
-@media (min-width: 1200px) {
-  .chat-container {
-    max-width: 900px;
-  }
 }
 
 @media (max-width: 768px) {

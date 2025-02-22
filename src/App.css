@@ -19,9 +19,9 @@ body {
 
 .clear-all-btn{
   background: none;
-  color: #db4437;
+  color: #ff4d4d; 
   font-weight: 600;
-  border: 1px solid #333;
+  border: 1px solid #ff4d4d;
   align-items: flex-end;
   width: 100px;
   text-align: center;
@@ -29,7 +29,7 @@ body {
 }
 
 .main-title {
-  font-size: 3rem;
+  font-size: 2rem;
   font-weight: bold;
   text-transform: uppercase;
   letter-spacing: 2px;
@@ -88,8 +88,18 @@ body {
   scrollbar-color: #333333 #1e1e1e;
 }
 
+.chat-output::-webkit-scrollbar {
+  width: 8px;
+}
+
+.chat-output::-webkit-scrollbar-thumb {
+  background: #666;
+  border-radius: 4px;
+}
+
+
 .chat-message {
-  background: #333333;
+  background: #3b3b3b;
   padding: 12px;
   border-radius: 8px;
   font-size: 14px;
@@ -138,7 +148,7 @@ body {
   padding: 12px;
   padding-right: 45px; 
   border-radius: 16px;
-  border: 1px solid #444;
+  border: 1px solid #666;
   resize: none;
   font-size: 14px;
   background: #333;
@@ -147,10 +157,12 @@ body {
 
 .input-textarea:focus{
   outline: none;
+  border-color: #007bff;
+  box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
 }
 
 .action-btn {
-  background: #0056b3;
+  background: #007bff;
   color: white;
   font-weight: 500;
   border: none;
@@ -166,7 +178,7 @@ body {
   position: absolute;
   right: 20px;
   bottom: 20px;
-  background: #0f0; 
+  background: #2ecc71;
   border-radius: 50%;
   width: 35px;
   height: 35px;
@@ -183,7 +195,7 @@ body {
 }
 
 .action-btn:hover {
-  background: #003f7f;
+  background: #0056e0;
 }
 
 .language-dropdown {
@@ -201,6 +213,12 @@ body {
   color: #ff4d4d;
   font-size: 12px;
   text-align: center;
+}
+
+@media (min-width: 1200px) {
+  .chat-container {
+    max-width: 900px;
+  }
 }
 
 @media (max-width: 768px) {

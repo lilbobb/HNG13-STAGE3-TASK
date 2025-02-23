@@ -1,28 +1,41 @@
 import { useEffect, useState } from "react";
+import { FaArrowUp } from "react-icons/fa";
 
 // Initialize Summarizer
 async function createSummarizer() {
   try {
-    if (typeof self === "undefined" || !self.ai || !self.ai.summarizer) {
-      console.error("Summarizer API is not available.");
+    if (typeof self === "undefined" || !self?.ai?.summarizer) {
       return null;
     }
 
     const options = { format: "plain-text", length: "short", maxLength: 50 };
-    const capabilities = await self.ai.summarizer.capabilities();
-    const available = capabilities.available;
 
-    if (available === "no") {
-      console.error("Summarizer API isn't usable.");
+    const capabilities = await self.ai.summarizer.capabilities();
+
+    if (!capabilities || !capabilities.available) {
+      return null;
+    }
+
+    const available = capabilities.available;
+    if (available !== "readily" && available !== "limited") {
       return null;
     }
 
     const summarizer = await self.ai.summarizer.create(options);
+    if (!summarizer) {
+      return null;
+    }
+
     if (available !== "readily") {
       summarizer.addEventListener("downloadprogress", (e) => {
-        console.log(`Downloading: ${e.loaded}/${e.total} bytes.`);
       });
-      await summarizer.ready;
+
+      try {
+        await summarizer.ready;
+      } catch (error) {
+        console.error("Summarizer failed to load:", error);
+        return null;
+      }
     }
 
     return summarizer;
@@ -36,7 +49,6 @@ async function createSummarizer() {
 async function createTranslator(sourceLanguage, targetLanguage) {
   try {
     if (typeof self === "undefined" || !self.ai || !self.ai.translator) {
-      console.error("AI translation API is not available.");
       return null;
     }
     return await self.ai.translator.create({ sourceLanguage, targetLanguage });
@@ -50,7 +62,6 @@ async function createTranslator(sourceLanguage, targetLanguage) {
 async function detectLanguage(text) {
   try {
     if (typeof self === "undefined" || !self.ai || !self.ai.languageDetector) {
-      console.error("Language Detector API is not available.");
       return null;
     }
 
@@ -58,12 +69,10 @@ async function detectLanguage(text) {
     const detectedLanguages = await detector.detect(text);
 
     if (!Array.isArray(detectedLanguages) || detectedLanguages.length === 0) {
-      console.error("No valid response from language detector.");
       return null;
     }
 
     const detectedLanguage = detectedLanguages[0].detectedLanguage;
-    console.log(`Detected Language: ${detectedLanguage}`);
     return detectedLanguage;
   } catch (error) {
     console.error("Error detecting language:", error);
@@ -81,7 +90,6 @@ const getStoredMessages = () => {
 };
 
 const showError = (message, setError, setLoading) => {
-  console.error(message);
   setError(message);
   setLoading({ index: null, type: "" });
 };
@@ -103,11 +111,10 @@ const TextProcessingInterface = () => {
       setError("Please enter text before sending.");
       return;
     }
-    setError(""); 
-  
+    setError("");
+
     const detectedLanguage = await detectLanguage(text);
-    console.log("Detected language:", detectedLanguage); 
-  
+
     const newMessage = {
       text,
       detectedLanguage,
@@ -115,16 +122,16 @@ const TextProcessingInterface = () => {
       translation: "",
       showSummarize: detectedLanguage === "en" && text.length > 150,
     };
-  
+
     setMessages([...messages, newMessage]);
     setText("");
-    setLoading({ index: null, type: "" }); 
+    setLoading({ index: null, type: "" });
   };
-  
 
   const handleSummarize = async (index) => {
     setLoading({ index, type: "summarizing" });
-    setError(""); 
+    setError("");
+
     const summarizer = await createSummarizer();
     if (!summarizer) {
       showError("Summarizer failed to initialize.", setError, setLoading);
@@ -132,6 +139,13 @@ const TextProcessingInterface = () => {
     }
 
     try {
+      // Check if messages[index].text exists
+      if (!messages[index] || !messages[index].text) {
+        showError("Invalid message text.", setError, setLoading);
+        return;
+      }
+
+
       const stream = await summarizer.summarize(messages[index].text, {
         context: "This article is intended for a tech-savvy audience.",
       });
@@ -147,14 +161,13 @@ const TextProcessingInterface = () => {
         )
       );
     } catch (error) {
-      showError("Summarization failed.", setError, setLoading);
+      showError(`Summarization failed: ${error.message}`, setError, setLoading);
     } finally {
-      setLoading({ index: null, type: "" }); 
+      setLoading({ index: null, type: "" });
     }
   };
 
   const handleTranslate = async (index) => {
-    console.log("Translation started. Loading state:", loading);
     setLoading({ index, type: "translating" });
     setError("");
 
@@ -282,7 +295,7 @@ const TextProcessingInterface = () => {
             disabled={!text.trim()}
             aria-label="Send text"
           >
-            🡆
+            <FaArrowUp />
           </button>
         </div>
       </div>
